@@ -4,11 +4,11 @@ import {
   PlayCircle, Info, ChevronLeft, ChevronRight, LogOut, Clapperboard, 
   Tv, MonitorPlay, TrendingUp, Award, Play, Film, Tv2, Mail, Lock, X, Filter,
   Eye, EyeOff, ShieldCheck, Sparkles, Flame, PlusCircle, MinusCircle, Save,
-  ArrowRight
+  ArrowRight, InfoIcon
 } from 'lucide-react';
 
 // ==========================================
-// TMDB API SETTINGS
+// TMDB API AYARLARI (Canlı Yayın İçin Hazır)
 // ==========================================
 const TMDB_API_KEY = '5d0983119d8fc90b3286bf7c9be516e0';
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
@@ -19,15 +19,15 @@ const TMDB_BACKDROP_BASE_URL = 'https://image.tmdb.org/t/p/original';
 const fetchTMDB = async (endpoint, lang = 'tr-TR') => {
   try {
     const response = await fetch(`${TMDB_BASE_URL}${endpoint}?api_key=${TMDB_API_KEY}&language=${lang}`);
-    if (!response.ok) throw new Error('Network error');
+    if (!response.ok) throw new Error('Ağ hatası');
     return await response.json();
   } catch (error) {
-    console.error("TMDB API Error:", error);
+    console.error("TMDB API Hatası:", error);
     return null;
   }
 };
 
-// Helper: Get Name Initials
+// Yardımcı Fonksiyon: Kullanıcı Baş Harflerini Al
 const getInitials = (name) => {
   if (!name) return '?';
   const parts = name.trim().split(' ');
@@ -36,7 +36,7 @@ const getInitials = (name) => {
 };
 
 // ==========================================
-// 1. i18n (LANGUAGE) LAYER
+// 1. DİL (i18n) SİSTEMİ
 // ==========================================
 const translations = {
   en: {
@@ -132,7 +132,7 @@ const I18nProvider = ({ children }) => {
 };
 
 // ==========================================
-// 2. DATA & USER MANAGEMENT (LOCAL)
+// 2. VERİ VE KULLANICI YÖNETİMİ (YEREL DURUM)
 // ==========================================
 const DataContext = createContext();
 const useData = () => useContext(DataContext);
@@ -148,12 +148,12 @@ const DataProvider = ({ children }) => {
 
   const login = (email, password) => {
     const name = email.split('@')[0];
-    setCurrentUser({ id: 'user-123', email });
+    setCurrentUser({ id: 'user-id-123', email });
     setUserData(prev => ({ ...prev, displayName: name }));
   };
 
   const registerComplete = (username, email) => {
-    setCurrentUser({ id: 'user-123', email });
+    setCurrentUser({ id: 'user-id-123', email });
     setUserData({
       watchlist: [],
       favorites: [],
@@ -204,7 +204,7 @@ const DataProvider = ({ children }) => {
 };
 
 // ==========================================
-// 3. UI COMPONENTS
+// 3. ARAYÜZ BİLEŞENLERİ
 // ==========================================
 
 const UserInitials = ({ name, size = "md" }) => {
@@ -236,9 +236,9 @@ const formatMediaCard = (item, type = 'movie') => {
     type: item.media_type || type,
     title: item.title || item.name,
     originalTitle: item.original_title || item.original_name,
-    poster: item.poster_path ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster',
-    highResPoster: item.poster_path ? `${TMDB_HIGH_RES_IMAGE_URL}${item.poster_path}` : 'https://via.placeholder.com/1000x1500?text=No+Poster',
-    backdrop: item.backdrop_path ? `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}` : 'https://via.placeholder.com/1920x1080?text=No+Backdrop',
+    poster: item.poster_path ? `${TMDB_IMAGE_BASE_URL}${item.poster_path}` : 'https://via.placeholder.com/500x750?text=Afiş+Yok',
+    highResPoster: item.poster_path ? `${TMDB_HIGH_RES_IMAGE_URL}${item.poster_path}` : 'https://via.placeholder.com/1000x1500?text=Afiş+Yok',
+    backdrop: item.backdrop_path ? `${TMDB_BACKDROP_BASE_URL}${item.backdrop_path}` : 'https://via.placeholder.com/1920x1080?text=Görsel+Yok',
     imdbRating: item.vote_average ? item.vote_average.toFixed(1) : 'N/A',
     overview: item.overview,
     year: (item.release_date || item.first_air_date || 'N/A').substring(0, 4)
@@ -288,7 +288,7 @@ const MediaCard = ({ media, onClick, progress }) => {
 };
 
 // ==========================================
-// VIEWS (PAGES)
+// SAYFALAR (VIEWS)
 // ==========================================
 
 const AuthView = ({ navigate }) => {
@@ -363,7 +363,7 @@ const AuthView = ({ navigate }) => {
           {!isLogin && formData.password.length > 0 && (
             <div className="px-1">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Security</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-gray-500">Güvenlik</span>
                 <span className="text-[10px] font-black uppercase text-blue-400">
                   {getPassStrength(formData.password) === 1 ? t.auth.passWeak : getPassStrength(formData.password) === 2 ? t.auth.passMedium : t.auth.passStrong}
                 </span>
@@ -381,7 +381,7 @@ const AuthView = ({ navigate }) => {
           </button>
         </form>
 
-        <div className="mt-8 text-center text-gray-500 font-bold">
+        <div className="mt-8 text-center text-gray-400 font-bold">
           {isLogin ? t.auth.noAccount : t.auth.haveAccount}{' '}
           <span onClick={() => setIsLogin(!isLogin)} className="text-blue-400 hover:text-blue-300 cursor-pointer transition-colors font-black border-b-2 border-blue-400/20 pb-0.5 ml-1">
             {isLogin ? t.auth.register : t.auth.login}
@@ -436,7 +436,7 @@ const HomeView = ({ navigate }) => {
   }, [tmdbLang]);
 
   if (loading) return <div className="h-screen flex items-center justify-center text-white text-2xl font-black tracking-widest animate-pulse">{t.home.loading}</div>;
-  if (!heroMedia) return <div className="h-screen flex items-center justify-center text-white">Connection error.</div>;
+  if (!heroMedia) return <div className="h-screen flex items-center justify-center text-white">Bağlantı hatası.</div>;
 
   return (
     <div className="pb-20">
@@ -542,10 +542,10 @@ const MediaDetailView = ({ mediaId, mediaType = 'movie' }) => {
         if (credits) {
           formatted.cast = credits.cast.slice(0, 4).map(c => c.name);
           const dir = credits.crew.find(c => c.job === 'Director' || c.department === 'Directing');
-          formatted.director = dir ? dir.name : 'Unknown';
+          formatted.director = dir ? dir.name : 'Bilinmiyor';
         } else {
           formatted.cast = [];
-          formatted.director = 'Unknown';
+          formatted.director = 'Bilinmiyor';
         }
         setMedia(formatted);
 
@@ -571,7 +571,7 @@ const MediaDetailView = ({ mediaId, mediaType = 'movie' }) => {
   }, []);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-white text-xl font-black tracking-widest animate-pulse">ECLIPSE...</div>;
-  if (!media) return <div className="min-h-screen flex items-center justify-center text-white text-xl">Content not found.</div>;
+  if (!media) return <div className="min-h-screen flex items-center justify-center text-white text-xl">İçerik bulunamadı.</div>;
 
   const history = userData.history[media.id] || {};
   const inWatchlist = (userData.watchlist || []).some(m => m.id === media.id);
@@ -681,7 +681,7 @@ const MediaDetailView = ({ mediaId, mediaType = 'movie' }) => {
               </div>
 
               <div className="mb-12">
-                <p className="text-gray-400 leading-relaxed text-xl font-bold italic">{media.overview || "No overview available."}</p>
+                <p className="text-gray-400 leading-relaxed text-xl font-bold italic">{media.overview || "Özet bulunmuyor."}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
@@ -866,7 +866,7 @@ const ProfileView = ({ navigate }) => {
 };
 
 // ==========================================
-// 5. MAIN APP COMPONENT
+// 5. ANA APP BİLEŞENİ
 // ==========================================
 export default function App() {
   return (
